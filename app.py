@@ -9,6 +9,9 @@ from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize, sent_tokenize
 
+from pprint import pprint
+
+
 nltk.download('stopwords')
 nltk.download('punkt')
 
@@ -24,29 +27,16 @@ def index():
 @app.route("/search_api", methods=["GET"])
 @cross_origin()
 def search_api():
-    text_str = request.args.get('text')
-    print(text_str)
-    #result = run_summarization(text_str)
-    result = "1"
-    
+    text_str = request.form['text']
+    result = run_summarization(text_str)
+        
     return result
 
 @app.route("/search", methods=["POST"])
+@cross_origin()
 def search():
-    text_str = '''
-La sintaxis tipo HTML que hemos observado (<h1> y <Hello/>) es el código JSX que hemos mencionado antes. Realmente no es HTML, aunque lo que escribimos acaban siendo etiquetas HTML en el DOM.
-El próximo paso es que nuestra aplicación sea capaz de manejar datos.
-Manejo de datos
-Hay dos tipos de datos en React: propiedades (props) y estado (state). La diferencia entre ellos es algo complicada de entender al principio, así que no te preocupes si te parece algo confusa. Los props son externos y no están controlados por el propio componente. Se pasan desde los componentes subiendo la jerarquía, que también controla los datos.
-Un componente puede cambiar su estado interno directamente. No puede cambiar sus props directamente.
-Primero, echemos un vistazo en detalle a los props.
-Props
-Nuestro componente Hello es muy estático y siempre dibuja el mismo mensaje. Una gran ventaja de React es su reusabilidad, es decir, escribir un componente una vez y reutilizar en diferentes casos de uso, por ejemplo, para mostrar diferentes mensajes.
-Para conseguir esta reusabilidad, añadimos props. Así es como pasamos props a un componente (destacado en negrita)
-'''
-    text_str = request.args.get('text')
+    text_str = request.form['text']
     result = run_summarization(text_str)
-    
     return result
 
 
@@ -91,13 +81,13 @@ def _score_sentences(sentences, freqTable) -> dict:
         for wordValue in freqTable:
             if wordValue in sentence.lower():
                 word_count_in_sentence_except_stop_words += 1
-                if sentence[:10] in sentenceValue:
-                    sentenceValue[sentence[:10]] += freqTable[wordValue]
+                if sentence[:20] in sentenceValue:
+                    sentenceValue[sentence[:20]] += freqTable[wordValue]
                 else:
-                    sentenceValue[sentence[:10]] = freqTable[wordValue]
+                    sentenceValue[sentence[:20]] = freqTable[wordValue]
 
-        if sentence[:10] in sentenceValue:
-            sentenceValue[sentence[:10]] = sentenceValue[sentence[:10]] / word_count_in_sentence_except_stop_words
+        if sentence[:20] in sentenceValue:
+            sentenceValue[sentence[:20]] = sentenceValue[sentence[:20]] / word_count_in_sentence_except_stop_words
 
         '''
         Notice that a potential issue with our score algorithm is that long sentences will have an advantage over short sentences. 
@@ -128,7 +118,7 @@ def _generate_summary(sentences, sentenceValue, threshold):
     summary = ''
 
     for sentence in sentences:
-        if sentence[:10] in sentenceValue and sentenceValue[sentence[:10]] >= (threshold):
+        if sentence[:20] in sentenceValue and sentenceValue[sentence[:20]] >= (threshold):
             summary += " " + sentence
             sentence_count += 1
 
@@ -140,6 +130,9 @@ def run_summarization(text):
     # 1 Create the word frequency table
     freq_table = _create_frequency_table(text)
 
+    print(freq_table)
+    print('---------------------------------')
+
     '''
     We already have a sentence tokenizer, so we just need 
     to run the sent_tokenize() method to create the array of sentences.
@@ -148,13 +141,27 @@ def run_summarization(text):
     # 2 Tokenize the sentences
     sentences = sent_tokenize(text)
 
+    pprint(sentences)
+    print('---------------------------------')
+
     # 3 Important Algorithm: score the sentences
     sentence_scores = _score_sentences(sentences, freq_table)
+
+    pprint(sentence_scores)
+    print('---------------------------------')
 
     # 4 Find the threshold
     threshold = _find_average_score(sentence_scores)
 
+    pprint(threshold)
+    print('---------------------------------')
+
+
     # 5 Important Algorithm: Generate the summary
-    summary = _generate_summary(sentences, sentence_scores, 1.3 * threshold)
+    summary = _generate_summary(sentences, sentence_scores, threshold)
+
+    pprint(summary)
+    print('---------------------------------')
+
 
     return summary
