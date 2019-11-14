@@ -24,18 +24,10 @@ def index():
 @app.route("/search_api", methods=["GET"])
 @cross_origin()
 def search_api():
-    text_str = '''
-La sintaxis tipo HTML que hemos observado (<h1> y <Hello/>) es el código JSX que hemos mencionado antes. Realmente no es HTML, aunque lo que escribimos acaban siendo etiquetas HTML en el DOM.
-El próximo paso es que nuestra aplicación sea capaz de manejar datos.
-Manejo de datos
-Hay dos tipos de datos en React: propiedades (props) y estado (state). La diferencia entre ellos es algo complicada de entender al principio, así que no te preocupes si te parece algo confusa. Los props son externos y no están controlados por el propio componente. Se pasan desde los componentes subiendo la jerarquía, que también controla los datos.
-Un componente puede cambiar su estado interno directamente. No puede cambiar sus props directamente.
-Primero, echemos un vistazo en detalle a los props.
-Props
-Nuestro componente Hello es muy estático y siempre dibuja el mismo mensaje. Una gran ventaja de React es su reusabilidad, es decir, escribir un componente una vez y reutilizar en diferentes casos de uso, por ejemplo, para mostrar diferentes mensajes.
-Para conseguir esta reusabilidad, añadimos props. Así es como pasamos props a un componente (destacado en negrita)
-'''
-    result = run_summarization(text_str)
+    text_str = request.args.get('text')
+    print(text_str)
+    #result = run_summarization(text_str)
+    result = "1"
     
     return result
 
@@ -52,6 +44,10 @@ Props
 Nuestro componente Hello es muy estático y siempre dibuja el mismo mensaje. Una gran ventaja de React es su reusabilidad, es decir, escribir un componente una vez y reutilizar en diferentes casos de uso, por ejemplo, para mostrar diferentes mensajes.
 Para conseguir esta reusabilidad, añadimos props. Así es como pasamos props a un componente (destacado en negrita)
 '''
+    text_str = request.args.get('text')
+    result = run_summarization(text_str)
+    
+    return result
 
 
 
